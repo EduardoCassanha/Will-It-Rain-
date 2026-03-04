@@ -41,8 +41,8 @@ def check_rain(trip: TripRequest):
     will_rain = max_prob >= 40
 
     return {
-        "origin": origin_coords["name"],
-        "destination": destination_coords["name"],
+        "origin": trip.origin,
+        "destination": trip.destination,
         "departure_time": departure,
         "will_rain": will_rain,
         "max_precipitation_probability": max_prob,

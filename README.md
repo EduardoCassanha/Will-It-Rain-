@@ -8,6 +8,8 @@
 
 A REST API that tells you whether it will rain **during your journey** — not just at your destination. Given an origin, destination, and departure time, it maps your route, estimates when you'll reach each point, and checks the forecast at the right time for each location.
 
+![API Response](assets/will_it_rain.png)
+
 ---
 
 ## The Problem

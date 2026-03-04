@@ -40,8 +40,3 @@ Given an origin and destination, the API:
 - [Nominatim](https://nominatim.openstreetmap.org/) — Geocoding
 - [OpenRouteService](https://openrouteservice.org/) — Routing
 - [Open-Meteo](https://open-meteo.com/) — Weather forecast
-```
-
-E o **.env.example:**
-```
-ORS_API_KEY=your_key_here

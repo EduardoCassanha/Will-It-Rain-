@@ -1,12 +1,20 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
-from geocoding import get_coordinates
-from route import get_route
-from weather import get_weather_for_points
+from backend.geocoding import get_coordinates
+from backend.route import get_route
+from backend.weather import get_weather_for_points
 from typing import Optional
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class TripRequest(BaseModel):
     origin: str

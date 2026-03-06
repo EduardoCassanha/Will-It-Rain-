@@ -12,6 +12,15 @@ async function handleSubmit() {
         return;
     }
 
+    if (departure) {
+        const selectedTime = new Date(departure);
+        const now = new Date();
+        if (selectedTime < now) {
+            alert('Departure time cannot be in the past.');
+            return;
+        }
+    }
+
     const btn = document.getElementById('btn');
     const result = document.getElementById('result');
     const error = document.getElementById('error');
@@ -25,11 +34,14 @@ async function handleSubmit() {
         const data = await fetchWeather(origin, destination, departure);
 
         document.getElementById('verdict').textContent = data.will_rain ? '☂️' : '☀️';
-        document.getElementById('recommendation').textContent = data.recommendation;
-        document.getElementById('probability').textContent = `Max precipitation probability: ${data.max_precipitation_probability}%`;
-        result.classList.add('show');
+        document.getElementById('recommendation').textContent = data.recommendation || "No recommendation available.";
 
+        const prob = data.max_precipitation_probability ?? 0;
+        document.getElementById('probability').textContent = `Max precipitation probability: ${prob}%`;
+
+        result.classList.add('show');
     } catch (e) {
+        console.error(e);
         error.classList.add('show');
     } finally {
         btn.disabled = false;

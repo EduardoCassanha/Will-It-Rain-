@@ -93,6 +93,7 @@ cp .env.example .env
 **Run:**
 
 ```bash
+cd backend
 python -m uvicorn main:app --reload
 ```
 

@@ -99,3 +99,55 @@ button:disabled {
     color: var(--text-muted);
     cursor: not-allowed;
 }
+
+.result {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border-radius: 12px;
+    display: none;
+}
+
+.result.show {
+    display: block;
+}
+
+.verdict {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.recommendation {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.probability {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.error {
+    color: var(--error);
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    display: none;
+}
+
+.error.show {
+    display: block;
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+}

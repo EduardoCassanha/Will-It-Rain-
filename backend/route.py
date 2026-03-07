@@ -39,11 +39,18 @@ def get_route(origin: dict, destination: dict) -> list:
         sampled = coordinates[::step]
 
         points = []
+        num_sampled = len(sampled)
+
         for i, coord in enumerate(sampled):
+
+            progress = i / (num_sampled - 1) if num_sampled > 1 else 0
+
+            estimated_minutes = (duration_seconds * progress) / 60
+
             points.append({
                 "lat": coord[1],
                 "lon": coord[0],
-                "estimated_minutes": (duration_seconds / len(sampled)) * i / 60
+                "estimated_minutes": round(estimated_minutes, 2)
             })
 
         return points

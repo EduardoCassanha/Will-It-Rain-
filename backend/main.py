@@ -1,17 +1,19 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
+from fastapi.middleware.cors import CORSMiddleware
+
 from backend.geocoding import get_coordinates
 from backend.route import get_route
 from backend.weather import get_weather_for_points
-from typing import Optional
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -45,7 +47,7 @@ def check_rain(trip: TripRequest):
     if not weather:
         return {"error": "Could not calculate route weather."}
 
-    max_prob = max(w["precipitation_probability"] for w in weather)
+    max_prob = max((w.get("precipitation_probability", 0) for w in weather), default=0)
     will_rain = max_prob >= 40
 
     return {

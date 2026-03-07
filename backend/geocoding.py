@@ -9,7 +9,7 @@ def get_coordinates(address: str) -> Optional[dict]:
         'limit': 1
     }
     headers = {
-        "User-Agent": "WillItRain/1.0 (https://github.com/EduardoCassanha/Will_It_Rain)"
+        "User-Agent": "WillItRain/1.0 (https://github.com/EduardoCassanha/Will-It-Rain-)"
     }
 
     try:

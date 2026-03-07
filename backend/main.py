@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -29,7 +29,22 @@ def root():
 
 @app.post("/check-rain")
 def check_rain(trip: TripRequest):
-    departure = trip.departure_time or datetime.now().strftime("%Y-%m-%dT%H:00")
+    now = datetime.now()
+
+    if not trip.departure_time or trip.departure_time.strip() == "":
+        departure = now.strftime("%Y-%m-%dT%H:00")
+    else:
+        try:
+            dt_departure = datetime.fromisoformat(trip.departure_time)
+            if dt_departure < (now - timedelta(minutes=5)):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Departure date cannot be in the past."
+                )
+            departure = trip.departure_time
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format.")
+
 
     origin_coords = get_coordinates(trip.origin)
     destination_coords = get_coordinates(trip.destination)

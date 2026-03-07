@@ -29,13 +29,18 @@ def get_route(origin: dict, destination: dict) -> list:
         response.raise_for_status()
         data = response.json()
 
-        if "features" not in data or not data["features"]:
-            return []
+        feature = data["features"][0]
+        coordinates = feature["geometry"]["coordinates"]
+        summary = feature["properties"]["summary"]
 
-        coordinates = data["features"][0]["geometry"]["coordinates"]
-        duration_seconds = data["features"][0]["properties"]["summary"]["duration"]
+        duration_seconds = summary["duration"]
+        distance_meters = summary["distance"]
 
-        step = max(1, len(coordinates) // 10)
+        distance_km = distance_meters / 1000
+        ideal_points = int(distance_km / 20)
+        num_points = max(5, min(ideal_points, 25))
+
+        step = max(1, len(coordinates) // num_points)
         sampled = coordinates[::step]
 
         points = []

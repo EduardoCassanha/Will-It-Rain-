@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
@@ -35,17 +35,17 @@ def check_rain(trip: TripRequest):
     destination_coords = get_coordinates(trip.destination)
 
     if not origin_coords or not destination_coords:
-        return {"error": "Could not find one or both locations."}
+        raise  HTTPException(status_code=404, detail="Could not find one or both locations.")
 
     route_points = get_route(origin_coords, destination_coords)
 
     try:
         weather = get_weather_for_points(route_points, departure)
     except Exception as e:
-        return {"error": f"Weather service unavailable: {str(e)}"}
+        raise HTTPException(status_code=503, detail=f"Weather service unavailable: {str(e)}")
 
     if not weather:
-        return {"error": "Could not calculate route weather."}
+        raise HTTPException(status_code=422, detail="Could not calculate route weather.")
 
     max_prob = max((w.get("precipitation_probability", 0) for w in weather), default=0)
     will_rain = max_prob >= 40

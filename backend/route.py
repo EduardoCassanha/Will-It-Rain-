@@ -24,6 +24,7 @@ async def get_route(origin: dict, destination: dict) -> list[dict]:
     }
 
     params = {
+        "api_key": ORS_API_KEY,
         "start": f"{origin['lon']},{origin['lat']}",
         "end": f"{destination['lon']},{destination['lat']}"
     }
@@ -32,6 +33,10 @@ async def get_route(origin: dict, destination: dict) -> list[dict]:
         try:
             logger.info(f"ROUTE: Fetching route from {origin['name']} to {destination['name']}")
             response = await client.get(ORS_URL, headers=headers, params=params)
+
+            if response.status_code != 200:
+                return []
+
             response.raise_for_status()
             data = response.json()
 

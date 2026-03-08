@@ -37,6 +37,8 @@ const i18n = {
 
 let currentLang = localStorage.getItem('lang') || 'en';
 
+let lastData = null;
+
 function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('lang', lang);
@@ -53,6 +55,23 @@ function setLang(lang) {
 
   document.getElementById('lang-en').classList.toggle('active', lang === 'en');
   document.getElementById('lang-pt').classList.toggle('active', lang === 'pt');
+
+  if (lastData) {
+      document.getElementById('recommendation').textContent = lastData.will_rain ? i18n[lang].umbrella : i18n[lang].good;
+
+      const prob = lastData.max_precipitation_probability ?? 0;
+      let detailText = i18n[lang].maxProb(prob);
+
+      if (lastData.route_weather && lastData.route_weather.length > 0) {
+          const maxPoint = lastData.route_weather.reduce((prev, current) => (prev.precipitation_probability > current.precipitation_probability) ? prev : current);
+          if (maxPoint.precipitation_probability > 0) {
+              const hour = new Date(maxPoint.time).getHours();
+              detailText += i18n[lang].around(hour);
+          }
+      }
+
+      document.getElementById('probability').textContent = detailText;
+  }
 }
 
 setLang(currentLang);
@@ -93,6 +112,7 @@ async function handleSubmit() {
 
     try {
         const data = await fetchWeather(origin, destination, departure);
+        lastData = data;
 
         document.getElementById('verdict').textContent = data.will_rain ? '☂️' : '☀️';
         document.getElementById('recommendation').textContent = data.will_rain ? i18n[currentLang].umbrella : i18n[currentLang].good;

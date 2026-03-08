@@ -15,6 +15,8 @@ async function handleSubmit() {
     if (departure) {
         const selectedTime = new Date(departure);
         const now = new Date();
+        now.setSeconds(0, 0);
+
         if (selectedTime < now) {
             alert('Departure time cannot be in the past.');
             return;

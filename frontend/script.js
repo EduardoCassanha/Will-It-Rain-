@@ -60,7 +60,11 @@ async function fetchWeather(origin, destination, departure) {
         body: JSON.stringify(body),
     });
 
-    if (!response.ok) throw new Error('API error');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.detail || 'API error';
+        throw new Error(errorMessage);
+    }
 
     return await response.json();
 }

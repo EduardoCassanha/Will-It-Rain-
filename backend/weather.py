@@ -1,16 +1,15 @@
-import requests
+import httpx
+import logging
 from datetime import datetime, timedelta
-from typing import List
 
+logger = logging.getLogger(__name__)
 
-def get_weather_for_points(points: list, departure_time: str) -> List[dict]:
-
+async def get_weather_for_points(points: list, departure_time: str) -> list[dict]:
     if not points:
         return []
 
     try:
         base_time = datetime.fromisoformat(departure_time)
-
         latitudes = [str(p["lat"]) for p in points]
         longitudes = [str(p["lon"]) for p in points]
 
@@ -24,9 +23,11 @@ def get_weather_for_points(points: list, departure_time: str) -> List[dict]:
         }
 
         headers = {"User-Agent": "WillItRain/1.0 (https://github.com/EduardoCassanha/Will-It-Rain-)"}
-        response = requests.get(url, params=params, headers=headers, timeout=15)
-        response.raise_for_status()
-        data = response.json()
+
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(url, params=params, headers=headers)
+            response.raise_for_status()
+            data = response.json()
 
         if not isinstance(data, list):
             data = [data]
@@ -55,7 +56,6 @@ def get_weather_for_points(points: list, departure_time: str) -> List[dict]:
                 })
 
         return results
-
-    except (requests.RequestException, ValueError, KeyError, IndexError) as e:
-        print(f"Weather Service Error: {e}")
+    except Exception as e:
+        logger.error(f"Weather Service Error: {e}")
         return []

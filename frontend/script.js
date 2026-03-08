@@ -54,7 +54,7 @@ async function handleSubmit() {
 
 async function fetchWeather(origin, destination, departure) {
     const body = { origin, destination };
-    if (departure) body.departure_time = departure.slice(0, 16) + ':00';
+    if (departure) body.departure_time = departure;
 
     const response = await fetch(API_URL, {
         method: 'POST',

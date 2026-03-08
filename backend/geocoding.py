@@ -30,6 +30,11 @@ async def get_coordinates(address: str) -> Optional[dict]:
         logger.info(f"GEOCODING: Searching coordinates for {address}")
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(LIQ_BASE_URL, params=params, headers=headers, timeout=10)
+
+            if response.status_code == 429:
+                logger.warning(f"GEOCODING: Rate limit reached for LocationIQ | Query: {address}")
+                return None
+
             response.raise_for_status()
             results = response.json()
 

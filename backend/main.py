@@ -25,11 +25,11 @@ class TripRequest(BaseModel):
     departure_time: Optional[str] = None
 
 @app.get("/")
-def root():
+async def root():
     return {"message": "Will It Rain API is on!"}
 
 @app.post("/check-rain")
-def check_rain(trip: TripRequest):
+async def check_rain(trip: TripRequest):
     now = datetime.now()
 
     if not trip.departure_time or trip.departure_time.strip() == "":
@@ -47,9 +47,9 @@ def check_rain(trip: TripRequest):
             raise HTTPException(status_code=400, detail="Invalid date format.")
 
 
-    origin_coords = get_coordinates(trip.origin)
+    origin_coords = await get_coordinates(trip.origin)
     time.sleep(1.5)
-    destination_coords = get_coordinates(trip.destination)
+    destination_coords = await get_coordinates(trip.destination)
 
     if not origin_coords or not destination_coords:
         raise HTTPException(status_code=404, detail="Could not find one or both locations.")

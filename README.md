@@ -10,6 +10,8 @@ A REST API with a web interface that tells you whether it will rain **during you
 
 ![API Response](assets/will_it_rain.png)
 
+**Live:** [will-it-rain.cassanha.com](https://will-it-rain.cassanha.com)
+
 ---
 
 ## The Problem
@@ -23,7 +25,7 @@ Most weather apps check a single location at a single time. But if you're drivin
 ```
 Origin + Destination + Departure Time
           ↓
-  Geocoding (Nominatim)
+  Geocoding (LocationIQ)
   Converts addresses → coordinates
           ↓
   Routing (OpenRouteService)
@@ -60,10 +62,10 @@ Origin + Destination + Departure Time
 ```
 Will_It_Rain/
 ├── backend/
-│   ├── main.py          # FastAPI app, endpoint definition and orchestration
-│   ├── geocoding.py     # Address → coordinates via Nominatim
+│   ├── geocoding.py     # Address → coordinates via LocationIQ
 │   ├── route.py         # Route calculation and point segmentation via OpenRouteService
 │   └── weather.py       # Precipitation forecast via Open-Meteo
+├── main.py              # FastAPI app, endpoint definition and orchestration
 ├── frontend/
 │   ├── index.html       # Web interface
 │   ├── style.css        # Styles
@@ -81,6 +83,7 @@ Each backend module has a single responsibility. `main.py` orchestrates the pipe
 
 **Prerequisites:**
 - Python 3.13+
+- Free API key from [LocationIQ](https://locationiq.com/)
 - Free API key from [OpenRouteService](https://openrouteservice.org/)
 
 **Install:**
@@ -88,20 +91,28 @@ Each backend module has a single responsibility. `main.py` orchestrates the pipe
 ```bash
 git clone https://github.com/EduardoCassanha/Will-It-Rain-.git
 cd Will_It_Rain
-pip install fastapi uvicorn requests python-dotenv
+pip install fastapi uvicorn httpx python-dotenv
 ```
 
 **Configure:**
 
 ```bash
 cp .env.example .env
-# Add your OpenRouteService API key to .env
+# Add your API keys to .env
+```
+
+**.env:**
+
+```env
+LOCATIONIQ_TOKEN=your_locationiq_token
+ORS_API_KEY=your_ors_api_key
+ALLOWED_ORIGINS=http://localhost:8000
 ```
 
 **Run the API:**
 
 ```bash
-python -m uvicorn backend.main:app --reload
+uvicorn main:app --reload
 ```
 
 Open `http://127.0.0.1:8000/docs` to explore and test the API via Swagger UI.
@@ -151,7 +162,7 @@ Open `http://localhost:3000` in your browser.
 
 | Service | Purpose |
 |---|---|
-| [Nominatim](https://nominatim.org/) | Geocoding — address to coordinates |
+| [LocationIQ](https://locationiq.com/) | Geocoding — address to coordinates |
 | [OpenRouteService](https://openrouteservice.org/) | Routing — path and duration |
 | [Open-Meteo](https://open-meteo.com/) | Weather forecast — precipitation per point |
 
@@ -163,6 +174,7 @@ Open `http://localhost:3000` in your browser.
 - **Dynamic route points** — scales with distance: 1 point per 20km, minimum 5, maximum 25
 - **Time estimation** — arrival time at each point is linearly interpolated from total trip duration; no real-time traffic data
 - **Past date protection** — API rejects departure times more than 5 minutes in the past
+- **Rate limit handling** — geocoding layer detects 429 responses from LocationIQ and returns a clean error upstream
 
 ---
 

@@ -34,26 +34,30 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
 
         results = []
         for i, point in enumerate(points):
-            arrival = base_time + timedelta(minutes=point["estimated_minutes"])
-            hour_str = arrival.strftime("%Y-%m-%dT%H:00")
 
             if i >= len(data):
                 continue
 
+            arrival = base_time + timedelta(minutes=point["estimated_minutes"])
             hourly = data[i].get("hourly", {})
             times = hourly.get("time", [])
-            prec_prob = hourly.get("precipitation_probability", [])
-            prec = hourly.get("precipitation", [])
 
-            if hour_str in times:
-                idx = times.index(hour_str)
+            target_prefix = arrival.strftime("%Y-%m-%dT%H")
+
+            try:
+
+                api_times = [datetime.fromisoformat(t) for t in times]
+
+                idx = min(range(len(api_times)), key=lambda j: abs(api_times[j] - arrival))
                 results.append({
                     "lat": point["lat"],
                     "lon": point["lon"],
-                    "time": hour_str,
-                    "precipitation_probability": prec_prob[idx],
-                    "precipitation_mm": prec[idx]
+                    "time": times[idx],
+                    "precipitation_probability": hourly.get("precipitation_probability", [])[idx],
+                    "precipitation_mm": hourly.get("precipitation", [])[idx],
                 })
+            except StopIteration:
+                continue
 
         return results
     except Exception as e:

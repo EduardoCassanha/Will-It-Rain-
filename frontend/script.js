@@ -1,3 +1,41 @@
+const i18n = {
+    en: {
+        subtitle: "Check if you need an umbrella for your trip",
+        originLabel: "Origin",
+        destinationLabel: "Destination",
+        departureLabel: "Departure",
+        originPlaceholder: "e.g. Campinas, São Paulo",
+        destinationPlaceholder: "e.g. Guarulhos, São Paulo",
+        btn: "Check",
+        btnLoading: "Checking...",
+        alertFields: "Please fill in origin and destination.",
+        noRecommendation: "No recommendation available.",
+        umbrella: "Take an umbrella!",
+        good: "You're good to go!",
+        maxProb: (prob) => `Max precipitation probability: ${prob}%`,
+        around: (hour) => ` around ${hour}:00h`,
+    },
+    pt: {
+        subtitle: "Veja se você precisa de guarda-chuva na sua viagem",
+        originLabel: "Origem",
+        destinationLabel: "Destino",
+        departureLabel: "Horário de saída (opcional)",
+        originPlaceholder: "ex: Barueri, São Paulo",
+        destinationPlaceholder: "ex: Mackenzie, São Paulo",
+        btn: "Verificar",
+        btnLoading: "Verificando...",
+        alertFields: "Preencha origem e destino.",
+        alertPast: "O horário de saída não pode estar no passado.",
+        noRecommendation: "Nenhuma recomendação disponível.",
+        umbrella: "Leve um guarda-chuva!",
+        good: "Pode ir tranquilo!",
+        maxProb: (prob) => `Probabilidade máxima de chuva: ${prob}%`,
+        around: (hour) => ` por volta das ${hour}h.`,
+    }
+}
+
+let currentLang = localStorage.getItem('lang') || 'en';
+
 const API_URL = 'https://api.will-it-rain.cassanha.com/check-rain';
 
 document.getElementById('btn').addEventListener('click', handleSubmit);

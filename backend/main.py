@@ -64,7 +64,7 @@ async def check_rain(trip: TripRequest):
         )
 
     try:
-        weather = get_weather_for_points(route_points, departure)
+        weather = await get_weather_for_points(route_points, departure)
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Weather service unavailable: {str(e)}")
 

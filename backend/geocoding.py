@@ -14,22 +14,23 @@ def get_coordinates(address: str) -> Optional[dict]:
     }
 
     try:
-        print(f"DEBUG: Searching coordinates for {address}")
+        print(f"[INFO] GEOCODING: Searching coordinates for {address}")
         response = requests.get(url, params=params, headers=headers, timeout=10)
         response.raise_for_status()
         results = response.json()
 
         if not results:
-            print(f"DEBUG: No results found for {address}")
+            print(f"[WARNING] GEOCODING: No results found for {address}")
             return None
 
         location = results[0]
-        print(f"DEBUG: Found location for {address}")
+        print(f"[SUCCESS] GEOCODING: Found location for {address}")
         return {
             "name": location["display_name"],
             "lat": float(location["lat"]),
             "lon": float(location["lon"])
         }
     except requests.RequestException as e:
-        print(f"DEBUG: Geocoding request failed: {e}")
+        status_code = e.response.status_code if e.response else "Timeout/Network Error"
+        print(f"[ERROR] GEOCODING: Request failed (Status: {status_code}) | Query: '{address}'")
         return None

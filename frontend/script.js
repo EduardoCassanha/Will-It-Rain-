@@ -41,8 +41,9 @@ async function handleSubmit() {
 
         result.classList.add('show');
     } catch (e) {
-        console.error(e);
-        error.classList.add('show');
+        const errorElement = document.getElementById('error');
+        errorElement.textContent = e.message;
+        errorElement.classList.add('show');
     } finally {
         btn.disabled = false;
         btn.textContent = 'Check';

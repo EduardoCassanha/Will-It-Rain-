@@ -56,5 +56,6 @@ def get_weather_for_points(points: list, departure_time: str) -> List[dict]:
 
         return results
 
-    except (requests.RequestException, ValueError, KeyError, IndexError):
+    except (requests.RequestException, ValueError, KeyError, IndexError) as e:
+        print(f"Weather Service Error: {e}")
         return []

@@ -1,9 +1,14 @@
 import asyncio
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
+
+load_dotenv()
 
 from backend.geocoding import get_coordinates
 from backend.route import get_route
@@ -11,11 +16,22 @@ from backend.weather import get_weather_for_points
 
 app = FastAPI()
 
+raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000")
+if raw_origins:
+    origins = raw_origins.split(",")
+else:
+    # Se o .env falhar, libera apenas o essencial para você não ficar travado
+    origins = [
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:63342"
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 

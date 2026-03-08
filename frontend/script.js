@@ -1,4 +1,4 @@
-const API_URL = 'http://127.0.0.1:8000/check-rain';
+const API_URL = 'https://api.will-it-rain.cassanha.com/check-rain';
 
 document.getElementById('btn').addEventListener('click', handleSubmit);
 

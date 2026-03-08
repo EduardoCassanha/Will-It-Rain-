@@ -1,3 +1,4 @@
+import time
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import datetime, timedelta
@@ -47,6 +48,7 @@ def check_rain(trip: TripRequest):
 
 
     origin_coords = get_coordinates(trip.origin)
+    time.sleep(1.5)
     destination_coords = get_coordinates(trip.destination)
 
     if not origin_coords or not destination_coords:

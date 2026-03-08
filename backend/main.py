@@ -1,4 +1,4 @@
-import time
+import asyncio
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import datetime, timedelta
@@ -47,9 +47,10 @@ async def check_rain(trip: TripRequest):
             raise HTTPException(status_code=400, detail="Invalid date format.")
 
 
-    origin_coords = await get_coordinates(trip.origin)
-    time.sleep(1.5)
-    destination_coords = await get_coordinates(trip.destination)
+    origin_task = get_coordinates(trip.origin)
+    dest_task = get_coordinates(trip.destination)
+
+    origin_coords, destination_coords = await asyncio.gather(origin_task, dest_task)
 
     if not origin_coords or not destination_coords:
         raise HTTPException(status_code=404, detail="Could not find one or both locations.")

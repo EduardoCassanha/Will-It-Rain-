@@ -67,7 +67,7 @@ async function handleSubmit() {
     const departure = document.getElementById('departure_time').value.trim();
 
     if (!origin || !destination) {
-        alert('Please fill in origin and destination.');
+        alert(i18n[currentLang].alertFields);
         return;
     }
 
@@ -77,7 +77,7 @@ async function handleSubmit() {
         now.setSeconds(0, 0);
 
         if (selectedTime < now) {
-            alert('Departure time cannot be in the past.');
+            alert(i18n[currentLang].alertPast);
             return;
         }
     }
@@ -87,7 +87,7 @@ async function handleSubmit() {
     const error = document.getElementById('error');
 
     btn.disabled = true;
-    btn.textContent = 'Checking...';
+    btn.textContent = i18n[currentLang].btnLoading;
     result.classList.remove('show');
     error.classList.remove('show');
 
@@ -95,11 +95,11 @@ async function handleSubmit() {
         const data = await fetchWeather(origin, destination, departure);
 
         document.getElementById('verdict').textContent = data.will_rain ? '☂️' : '☀️';
-        document.getElementById('recommendation').textContent = data.recommendation || "No recommendation available.";
+        document.getElementById('recommendation').textContent = data.will_rain ? i18n[currentLang].umbrella : i18n[currentLang].good;
 
         const prob = data.max_precipitation_probability ?? 0;
 
-        let detailText = `Max precipitation probability: ${prob}%`;
+        let detailText = i18n[currentLang].maxProb(prob);
 
         if (data.route_weather && data.route_weather.length > 0) {
             const maxPoint = data.route_weather.reduce((prev, current) =>
@@ -108,7 +108,7 @@ async function handleSubmit() {
 
             if (maxPoint.precipitation_probability > 0) {
                 const hour = new Date(maxPoint.time).getHours();
-                detailText += ` around ${hour}:00h.`;
+                detailText += i18n[currentLang].around(hour);
             }
         }
 
@@ -121,7 +121,7 @@ async function handleSubmit() {
         errorElement.classList.add('show');
     } finally {
         btn.disabled = false;
-        btn.textContent = 'Check';
+        btn.textContent = i18n[currentLang].btn;
     }
 }
 

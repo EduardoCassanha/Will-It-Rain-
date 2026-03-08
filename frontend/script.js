@@ -39,9 +39,23 @@ async function handleSubmit() {
         document.getElementById('recommendation').textContent = data.recommendation || "No recommendation available.";
 
         const prob = data.max_precipitation_probability ?? 0;
-        document.getElementById('probability').textContent = `Max precipitation probability: ${prob}%`;
 
+        let detailText = `Max precipitation probability: ${prob}%`;
+
+        if (data.route_weather && data.route_weather.length > 0) {
+            const maxPoint = data.route_weather.reduce((prev, current) =>
+                (prev.precipitation_probability > current.precipitation_probability) ? prev : current
+            );
+
+            if (maxPoint.precipitation_probability > 0) {
+                const hour = new Date(maxPoint.time).getHours();
+                detailText += ` around ${hour}:00h.`;
+            }
+        }
+
+        document.getElementById('probability').textContent = detailText;
         result.classList.add('show');
+
     } catch (e) {
         const errorElement = document.getElementById('error');
         errorElement.textContent = e.message;

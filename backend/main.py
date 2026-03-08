@@ -50,7 +50,7 @@ def check_rain(trip: TripRequest):
     destination_coords = get_coordinates(trip.destination)
 
     if not origin_coords or not destination_coords:
-        raise  HTTPException(status_code=404, detail="Could not find one or both locations.")
+        raise HTTPException(status_code=404, detail="Could not find one or both locations.")
 
     route_points = get_route(origin_coords, destination_coords)
 

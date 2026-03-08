@@ -1,16 +1,26 @@
+import os
 import httpx
 import logging
-from typing import Optional
+from typing import Optional, Dict
+from dotenv import load_dotenv
 
+load_dotenv()
 logger= logging.getLogger(__name__)
 
+LIQ_TOKEN = os.getenv("LOCATIONIQ_TOKEN")
+LIQ_BASE_URL = "https://us1.locationiq.com/v1/search"
+
 async def get_coordinates(address: str) -> Optional[dict]:
-    url = "https://nominatim.openstreetmap.org/search"
+
+    if not LIQ_TOKEN:
+        logger.error("GEOCODING: LOCATIONIQ_TOKEN missing in environment")
+        return None
+
     params = {
+        'key': LIQ_TOKEN,
         'q': address,
-        'format': 'json',
-        'limit': 1,
-        'addressdetails': 1
+        'format': "json",
+        'limit': 1
     }
     headers = {
         "User-Agent": "WillItRain/1.0 (https://github.com/EduardoCassanha/Will-It-Rain-)"
@@ -19,7 +29,7 @@ async def get_coordinates(address: str) -> Optional[dict]:
     try:
         logger.info(f"GEOCODING: Searching coordinates for {address}")
         async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, params=params, headers=headers, timeout=10)
+            response = await client.get(LIQ_BASE_URL, params=params, headers=headers, timeout=10)
             response.raise_for_status()
             results = response.json()
 

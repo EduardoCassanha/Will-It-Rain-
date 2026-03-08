@@ -54,6 +54,12 @@ def check_rain(trip: TripRequest):
 
     route_points = get_route(origin_coords, destination_coords)
 
+    if not route_points:
+        raise HTTPException(
+            status_code=422,
+            detail="No ground route found between these locations."
+        )
+
     try:
         weather = get_weather_for_points(route_points, departure)
     except Exception as e:

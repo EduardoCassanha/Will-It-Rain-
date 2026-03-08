@@ -37,6 +37,26 @@ const i18n = {
 
 let currentLang = localStorage.getItem('lang') || 'en';
 
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+
+  const t = i18n[lang];
+
+  document.querySelector('.subtitle').textContent = t.subtitle;
+  document.querySelector('label[for="origin"]').textContent = t.originLabel;
+  document.querySelector('label[for="destination"]').textContent = t.destinationLabel;
+  document.querySelector('label[for="departure_time"]').textContent = t.departureLabel;
+  document.getElementById('origin').placeholder = t.originPlaceholder;
+  document.getElementById('destination').placeholder = t.destinationPlaceholder;
+  document.getElementById('btn').textContent = t.btn;
+
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  document.getElementById('lang-pt').classList.toggle('active', lang === 'pt');
+}
+
+setLang(currentLang);
+
 const API_URL = 'https://api.will-it-rain.cassanha.com/check-rain';
 
 document.getElementById('btn').addEventListener('click', handleSubmit);

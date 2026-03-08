@@ -1,10 +1,7 @@
 import logging
-
-import requests
 import os
 import httpx
 from dotenv import load_dotenv
-from typing import List
 
 load_dotenv()
 logger = logging.getLogger(__name__)

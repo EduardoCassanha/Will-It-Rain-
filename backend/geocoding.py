@@ -1,7 +1,7 @@
 import os
 import httpx
 import logging
-from typing import Optional, Dict
+from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv()

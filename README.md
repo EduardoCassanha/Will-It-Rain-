@@ -63,9 +63,9 @@ Origin + Destination + Departure Time
 Will_It_Rain/
 ├── backend/
 │   ├── geocoding.py     # Address → coordinates via LocationIQ
+│   ├── main.py          # FastAPI app, endpoint definition and orchestration
 │   ├── route.py         # Route calculation and point segmentation via OpenRouteService
 │   └── weather.py       # Precipitation forecast via Open-Meteo
-├── main.py              # FastAPI app, endpoint definition and orchestration
 ├── frontend/
 │   ├── index.html       # Web interface
 │   ├── style.css        # Styles

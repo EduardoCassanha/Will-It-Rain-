@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from backend.http_client import http_client
 
 load_dotenv()
 
@@ -20,7 +22,12 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 )
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    await http_client.aclose()
+    logging.info("Global HTTP client closed.")
+app = FastAPI(lifespan=lifespan)
 
 raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000")
 if raw_origins:

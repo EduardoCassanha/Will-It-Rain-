@@ -3,6 +3,7 @@ import httpx
 import logging
 from typing import Optional
 from dotenv import load_dotenv
+from backend.http_client import http_client
 
 load_dotenv()
 logger= logging.getLogger(__name__)
@@ -11,7 +12,6 @@ LIQ_TOKEN = os.getenv("LOCATIONIQ_TOKEN")
 LIQ_BASE_URL = "https://us1.locationiq.com/v1/search"
 
 async def get_coordinates(address: str) -> Optional[dict]:
-
     if not LIQ_TOKEN:
         logger.error("GEOCODING: LOCATIONIQ_TOKEN missing in environment")
         return None
@@ -28,15 +28,15 @@ async def get_coordinates(address: str) -> Optional[dict]:
 
     try:
         logger.info(f"GEOCODING: Searching coordinates for {address}")
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(LIQ_BASE_URL, params=params, headers=headers, timeout=10)
 
-            if response.status_code == 429:
-                logger.warning(f"GEOCODING: Rate limit reached for LocationIQ | Query: {address}")
-                return None
+        response = await http_client.get(LIQ_BASE_URL, params=params, headers=headers)
 
-            response.raise_for_status()
-            results = response.json()
+        if response.status_code == 429:
+            logger.warning(f"GEOCODING: Rate limit reached for LocationIQ | Query: {address}")
+            return None
+
+        response.raise_for_status()
+        results = response.json()
 
         if not results:
             logger.warning(f"GEOCODING: No results found for {address}")
@@ -50,5 +50,5 @@ async def get_coordinates(address: str) -> Optional[dict]:
             "lon": float(location["lon"])
         }
     except httpx.HTTPError as e:
-        logger.error(f"GEOCODING: Request failed | Query: {address}) | Error: '{str(e)}'")
+        logger.error(f"GEOCODING: Request failed | Query: {address} | Error: '{str(e)}'")
         return None

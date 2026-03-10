@@ -29,13 +29,16 @@ async def lifespan(app: FastAPI):
     logging.info("Global HTTP client closed.")
 app = FastAPI(lifespan=lifespan)
 
-raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000")
+raw_origins = os.getenv("ALLOWED_ORIGINS")
+
 if raw_origins:
     origins = raw_origins.split(",")
 else:
     origins = [
-        "http://localhost:8000",
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
         "http://127.0.0.1:8000",
+        "http://localhost:8000",
         "http://localhost:63342"
     ]
 
@@ -43,8 +46,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 class TripRequest(BaseModel):

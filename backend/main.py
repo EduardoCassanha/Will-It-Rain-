@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from backend.http_client import http_client
 
 load_dotenv()
 
@@ -20,15 +22,23 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 )
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    await http_client.aclose()
+    logging.info("Global HTTP client closed.")
+app = FastAPI(lifespan=lifespan)
 
-raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000")
+raw_origins = os.getenv("ALLOWED_ORIGINS")
+
 if raw_origins:
     origins = raw_origins.split(",")
 else:
     origins = [
-        "http://localhost:8000",
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
         "http://127.0.0.1:8000",
+        "http://localhost:8000",
         "http://localhost:63342"
     ]
 
@@ -36,14 +46,15 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 class TripRequest(BaseModel):
     origin: str
     destination: str
-    departure_time: Optional[str] = None
+    departure_time: Optional[datetime] = None
 
 @app.get("/")
 async def root():
@@ -53,25 +64,14 @@ async def root():
 async def check_rain(trip: TripRequest):
     now = datetime.now()
 
-    if not trip.departure_time or trip.departure_time.strip() == "":
-        departure = now.strftime("%Y-%m-%dT%H:00")
-    else:
-        try:
-            dt_departure = datetime.fromisoformat(trip.departure_time)
-            if dt_departure < (now - timedelta(minutes=5)):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Departure date cannot be in the past."
-                )
-            departure = trip.departure_time
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid date format.")
+    departure = trip.departure_time or now
+    if departure < (now - timedelta(minutes=5)):
+        raise HTTPException(status_code=400, detail="Departure date cannot be in the past.")
 
-
-    origin_task = get_coordinates(trip.origin)
-    dest_task = get_coordinates(trip.destination)
-
-    origin_coords, destination_coords = await asyncio.gather(origin_task, dest_task)
+    origin_coords, destination_coords = await asyncio.gather(
+        get_coordinates(trip.origin),
+        get_coordinates(trip.destination)
+    )
 
     if not origin_coords or not destination_coords:
         raise HTTPException(status_code=404, detail="Could not find one or both locations.")
@@ -79,18 +79,12 @@ async def check_rain(trip: TripRequest):
     route_points = await get_route(origin_coords, destination_coords)
 
     if not route_points:
-        raise HTTPException(
-            status_code=422,
-            detail="No ground route found between these locations."
-        )
+        raise HTTPException(status_code=422, detail="No ground route found between these locations.")
 
-    try:
-        weather = await get_weather_for_points(route_points, departure)
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Weather service unavailable: {str(e)}")
+    weather = await get_weather_for_points(route_points, departure.isoformat())
 
     if not weather:
-        raise HTTPException(status_code=422, detail="Could not calculate route weather.")
+        raise HTTPException(status_code=422, detail="Weather data unavailable.")
 
     max_prob = max((w.get("precipitation_probability", 0) for w in weather), default=0)
     will_rain = max_prob >= 40

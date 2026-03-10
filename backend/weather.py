@@ -1,6 +1,7 @@
 import httpx
 import logging
 from datetime import datetime, timedelta
+from backend.http_client import http_client
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +25,9 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
 
         headers = {"User-Agent": "WillItRain/1.0 (https://github.com/EduardoCassanha/Will-It-Rain-)"}
 
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            response = await client.get(url, params=params, headers=headers)
-            response.raise_for_status()
-            data = response.json()
+        response = await http_client.get(url, params=params, headers=headers)
+        response.raise_for_status()
+        data = response.json()
 
         if not isinstance(data, list):
             data = [data]

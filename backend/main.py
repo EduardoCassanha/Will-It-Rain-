@@ -3,7 +3,7 @@ import os
 import logging
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import Optional
@@ -70,7 +70,8 @@ async def root():
     return {"message": "Will It Rain API is on!"}
 
 @app.post("/check-rain")
-async def check_rain(trip: TripRequest):
+@limiter.limit("10/minute")
+async def check_rain(request: Request, trip: TripRequest):
     now = datetime.now()
 
     departure = trip.departure_time or now

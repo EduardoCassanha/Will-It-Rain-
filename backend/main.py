@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI):
     await http_client.aclose()
     logging.info("Global HTTP client closed.")
 
-limiter = Limiter(ket_func=get_remote_address)
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(lifespan=lifespan)
 
 app.state.limiter = limiter

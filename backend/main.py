@@ -11,6 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from backend.http_client import http_client
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 load_dotenv()
 
 from backend.geocoding import get_coordinates
@@ -27,7 +31,12 @@ async def lifespan(app: FastAPI):
     yield
     await http_client.aclose()
     logging.info("Global HTTP client closed.")
+
+limiter = Limiter(ket_func=get_remote_address)
 app = FastAPI(lifespan=lifespan)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 raw_origins = os.getenv("ALLOWED_ORIGINS")
 

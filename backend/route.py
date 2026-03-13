@@ -46,6 +46,8 @@ async def get_route(origin: dict, destination: dict) -> list[dict]:
         num_points = max(5, min(ideal_points, 25))
         step = max(1, len(coordinates) // num_points)
         sampled = coordinates[::step]
+        if coordinates[-1] not in sampled:
+            sampled.append(coordinates[-1])
 
         points = []
         num_sampled = len(sampled)

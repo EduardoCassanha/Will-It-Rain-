@@ -1,6 +1,5 @@
 import logging
 import os
-import httpx
 from dotenv import load_dotenv
 from backend.http_client import http_client
 
@@ -22,7 +21,6 @@ async def get_route(origin: dict, destination: dict) -> list[dict]:
     }
 
     params = {
-        "api_key": ORS_API_KEY,
         "start": f"{origin['lon']},{origin['lat']}",
         "end": f"{destination['lon']},{destination['lat']}"
     }
@@ -35,7 +33,6 @@ async def get_route(origin: dict, destination: dict) -> list[dict]:
         if response.status_code != 200:
             return []
 
-        response.raise_for_status()
         data = response.json()
 
         feature = data["features"][0]

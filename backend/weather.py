@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from backend.http_client import http_client
 
 logger = logging.getLogger(__name__)
@@ -9,7 +9,7 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
         return []
 
     try:
-        base_time = datetime.fromisoformat(departure_time)
+        base_time = datetime.fromisoformat(departure_time).replace(tzinfo=timezone.utc)
         latitudes = [str(p["lat"]) for p in points]
         longitudes = [str(p["lon"]) for p in points]
 
@@ -43,7 +43,7 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
 
             try:
 
-                api_times = [datetime.fromisoformat(t) for t in times]
+                api_times = [datetime.fromisoformat(t).replace(tzinfo=timezone.utc) for t in times]
 
                 idx = min(range(len(api_times)), key=lambda j: abs(api_times[j] - arrival))
                 results.append({

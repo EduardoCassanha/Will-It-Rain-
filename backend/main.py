@@ -68,9 +68,12 @@ class TripRequest(BaseModel):
     @field_validator('origin', 'destination')
     @classmethod
     def validate_length(cls, v):
+        v = v.strip()
+        if not v:
+            raise ValueError("Field cannot be empty")
         if len(v) > 200:
             raise ValueError('Field too long')
-        return v.strip()
+        return v
 
 @app.get("/")
 async def root():

@@ -65,7 +65,7 @@ function setLang(lang) {
       if (lastData.route_weather && lastData.route_weather.length > 0) {
           const maxPoint = lastData.route_weather.reduce((prev, current) => (prev.precipitation_probability > current.precipitation_probability) ? prev : current);
           if (maxPoint.precipitation_probability > 0) {
-              const hour = new Date(maxPoint.time).getHours();
+              const hour = new Date(maxPoint.time + 'Z').getHours();
               detailText += i18n[lang].around(hour);
           }
       }
@@ -127,7 +127,7 @@ async function handleSubmit() {
             );
 
             if (maxPoint.precipitation_probability > 0) {
-                const hour = new Date(maxPoint.time).getHours();
+                const hour = new Date(maxPoint.time + 'Z').getHours();
                 detailText += i18n[currentLang].around(hour);
             }
         }

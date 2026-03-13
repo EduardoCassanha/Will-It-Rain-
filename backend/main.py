@@ -2,7 +2,7 @@ import asyncio
 import os
 import logging
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from dotenv import load_dotenv
@@ -82,7 +82,7 @@ async def root():
 @app.post("/check-rain")
 @limiter.limit("10/minute")
 async def check_rain(request: Request, trip: TripRequest):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
 
     departure = trip.departure_time or now
     if departure < (now - timedelta(minutes=5)):

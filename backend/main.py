@@ -4,7 +4,7 @@ import logging
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
@@ -64,6 +64,13 @@ class TripRequest(BaseModel):
     origin: str
     destination: str
     departure_time: Optional[datetime] = None
+
+    @field_validator('origin', 'destination')
+    @classmethod
+    def validate_length(cls, v):
+        if len(v) > 200:
+            raise ValueError('Field too long')
+        return v.strip()
 
 @app.get("/")
 async def root():

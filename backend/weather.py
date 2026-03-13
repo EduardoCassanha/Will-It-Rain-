@@ -18,7 +18,7 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
             "latitude": ",".join(latitudes),
             "longitude": ",".join(longitudes),
             "hourly": "precipitation_probability,precipitation",
-            "timezone": "auto",
+            "timezone": "UTC",
             "forecast_days": 2
         }
 

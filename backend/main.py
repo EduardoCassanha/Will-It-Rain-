@@ -1,23 +1,22 @@
 import asyncio
 import os
 import logging
+from contextlib import asynccontextmanager
+from datetime import datetime, timedelta
+from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel, field_validator
-from datetime import datetime, timedelta
-from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-from backend.http_client import http_client
-
+from pydantic import BaseModel, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 load_dotenv()
 
 from backend.geocoding import get_coordinates
+from backend.http_client import http_client
 from backend.route import get_route
 from backend.weather import get_weather_for_points
 

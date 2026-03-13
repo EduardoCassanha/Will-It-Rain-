@@ -147,7 +147,10 @@ async function handleSubmit() {
 
 async function fetchWeather(origin, destination, departure) {
     const body = { origin, destination };
-    if (departure) body.departure_time = departure;
+    if (departure) {
+        const localDate = new Date(departure);
+        body.departure_time = localDate.toISOString();
+    }
 
     const response = await fetch(API_URL, {
         method: 'POST',

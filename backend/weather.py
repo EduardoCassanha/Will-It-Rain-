@@ -1,4 +1,3 @@
-import httpx
 import logging
 from datetime import datetime, timedelta
 from backend.http_client import http_client
@@ -42,8 +41,6 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
             hourly = data[i].get("hourly", {})
             times = hourly.get("time", [])
 
-            target_prefix = arrival.strftime("%Y-%m-%dT%H")
-
             try:
 
                 api_times = [datetime.fromisoformat(t) for t in times]
@@ -56,10 +53,10 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
                     "precipitation_probability": hourly.get("precipitation_probability", [])[idx],
                     "precipitation_mm": hourly.get("precipitation", [])[idx],
                 })
-            except StopIteration:
+            except (ValueError, IndexError):
                 continue
 
         return results
     except Exception as e:
-        logger.error(f"Weather Service Error: {e}")
+        logger.error(f"Weather Service Error: {type(e).__name__}: {e}")
         return []

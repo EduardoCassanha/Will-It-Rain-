@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from backend.http_client import http_client
 
 load_dotenv()
-logger= logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 LIQ_TOKEN = os.getenv("LOCATIONIQ_TOKEN")
 LIQ_BASE_URL = "https://us1.locationiq.com/v1/search"

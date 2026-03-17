@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from backend.main import app
 from unittest.mock import AsyncMock, patch
+from datetime import datetime, timezone
 
 client = TestClient(app)
 
@@ -10,7 +11,8 @@ client = TestClient(app)
 def test_check_rain_success(mock_weather, mock_route, mock_coords):
     mock_coords.return_value = {"name": "São Paulo", "lat": -23.55, "lon": -46.63}
     mock_route.return_value = [{"lat": -23.55, "lon": -46.63, "estimated_minutes": 0}]
-    mock_weather.return_value = [{"precipitation_probability": 20, "precipitation_mm": 0, "lat": -23.55, "lon": -46.63, "time": "2026-03-11T10:00"}]
+    future_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+    mock_weather.return_value = [{"precipitation_probability": 20, "precipitation_mm": 0, "lat": -23.55, "lon": -46.63, "time": future_time}]
 
     response = client.post("/check-rain", json={"origin": "São Paulo", "destination": "Campinas"})
     assert response.status_code == 200

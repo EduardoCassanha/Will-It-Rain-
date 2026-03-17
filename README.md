@@ -6,7 +6,7 @@
 
 > **Don't just check the weather at your destination. Check it along the way.**
 
-A REST API with a web interface that tells you whether it will rain **during your journey** — not just at your destination. Given an origin, destination, and departure time, it maps your route, estimates when you'll reach each point, and checks the forecast at the right time for each location.
+A REST API with a web interface that tells you whether it will rain **during your journey**, not just at your destination. Given an origin, destination, and departure time, it maps your route, estimates when you'll reach each point, and checks the forecast at the right time for each location.
 
 ![API Response](assets/will_it_rain.png)
 
@@ -16,12 +16,11 @@ A REST API with a web interface that tells you whether it will rain **during you
 
 ## The Problem
 
-Most weather apps check a single location at a single time. But if you're driving 2 hours across the city, rain at your destination in 30 minutes doesn't mean you'll get wet — and clear skies now doesn't mean you'll stay dry. **Will It Rain?** solves this by treating your route as a timeline, not a single point.
+Most weather apps check a single location at a single time. But if you're driving 2 hours across the city, rain at your destination in 30 minutes doesn't mean you'll get wet, and clear skies now doesn't mean you'll stay dry. **Will It Rain?** solves this by treating your route as a timeline, not a single point.
 
 ---
 
 ## How It Works
-
 ```
 Origin + Destination + Departure Time
           ↓
@@ -52,17 +51,20 @@ Origin + Destination + Departure Time
 - **Dynamic route sampling** — number of points scales with distance (1 point per 20km, min 5, max 25)
 - **Efficient API usage** — fetches all weather data in a single Open-Meteo request
 - **Clear recommendation** — returns `"Take an umbrella!"` or `"You're good to go!"`
-- **Web interface** — clean, minimal frontend to use without touching the API directly
+- **Web interface** — clean, minimal frontend with EN/PT-BR language toggle
+- **Rate limiting** — 10 requests per minute per IP to protect external API quotas
+- **Input validation** — rejects empty, whitespace-only, or oversized inputs
+- **Automated tests** — pytest suite with mocked external API calls
 - **Secure config** — API keys managed via `.env` with `.env.example` provided
 
 ---
 
 ## Architecture
-
 ```
 Will_It_Rain/
 ├── backend/
 │   ├── geocoding.py     # Address → coordinates via LocationIQ
+│   ├── http_client.py   # Shared async HTTP client
 │   ├── main.py          # FastAPI app, endpoint definition and orchestration
 │   ├── route.py         # Route calculation and point segmentation via OpenRouteService
 │   └── weather.py       # Precipitation forecast via Open-Meteo
@@ -70,6 +72,9 @@ Will_It_Rain/
 │   ├── index.html       # Web interface
 │   ├── style.css        # Styles
 │   └── script.js        # API integration and DOM rendering
+├── tests/
+│   ├── __init__.py
+│   └── test_main.py     # Endpoint and input validation tests
 ├── assets/
 ├── .env.example
 └── .gitignore
@@ -87,22 +92,19 @@ Each backend module has a single responsibility. `main.py` orchestrates the pipe
 - Free API key from [OpenRouteService](https://openrouteservice.org/)
 
 **Install:**
-
 ```bash
 git clone https://github.com/EduardoCassanha/Will-It-Rain-.git
 cd Will_It_Rain
-pip install fastapi uvicorn httpx python-dotenv
+pip install -r requirements.txt
 ```
 
 **Configure:**
-
 ```bash
 cp .env.example .env
 # Add your API keys to .env
 ```
 
 **.env:**
-
 ```env
 LOCATIONIQ_TOKEN=your_locationiq_token
 ORS_API_KEY=your_ors_api_key
@@ -110,28 +112,30 @@ ALLOWED_ORIGINS=http://localhost:8000
 ```
 
 **Run the API:**
-
 ```bash
-uvicorn main:app --reload
+python -m uvicorn backend.main:app --reload
 ```
 
 Open `http://127.0.0.1:8000/docs` to explore and test the API via Swagger UI.
 
 **Run the frontend:**
-
 ```bash
 cd frontend
-python -m http.server 3000
+python -m http.server 5500
 ```
 
-Open `http://localhost:3000` in your browser.
+Open `http://localhost:5500` in your browser.
+
+**Run tests:**
+```bash
+python -m pytest
+```
 
 ---
 
 ## Usage
 
 **`POST /check-rain`**
-
 ```json
 {
   "origin": "Barueri, São Paulo",
@@ -143,7 +147,6 @@ Open `http://localhost:3000` in your browser.
 `departure_time` is optional — if omitted, the current time is used.
 
 **Response:**
-
 ```json
 {
   "origin": "Barueri, São Paulo",

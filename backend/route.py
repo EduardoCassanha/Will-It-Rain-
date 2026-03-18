@@ -79,6 +79,6 @@ async def get_route(origin: dict, destination: dict) -> list[dict]:
             })
 
         return points
-    except Exception as e:
-        logger.error(f"ROUTE: Error fetching route: {str(e)}")
+    except Exception:
+        logger.error(f"ROUTE: Error fetching route")
         return []

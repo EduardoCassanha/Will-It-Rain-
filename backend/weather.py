@@ -67,6 +67,6 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
                 continue
 
         return results
-    except Exception as e:
-        logger.error(f"Weather Service Error: {type(e).__name__}: {e}")
+    except Exception:
+        logger.error(f"Weather Service Error")
         return []

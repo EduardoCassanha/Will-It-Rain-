@@ -42,19 +42,26 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
 
             arrival = base_time + timedelta(minutes=point["estimated_minutes"])
             hourly = data[i].get("hourly", {})
+
+            prob_list = hourly.get("precipitation_probability", [])
+            precip_list = hourly.get("precipitation", [])
             times = hourly.get("time", [])
+
+            if not all([times, prob_list, precip_list]):
+                logger.warning(f"WEATHER: Incomplete data for point {i} ({point['lat']}, {point['lon']})")
+                continue
 
             try:
 
                 api_times = [datetime.fromisoformat(t).replace(tzinfo=timezone.utc) for t in times]
-
                 idx = min(range(len(api_times)), key=lambda j: abs(api_times[j] - arrival))
+
                 results.append({
                     "lat": point["lat"],
                     "lon": point["lon"],
                     "time": times[idx],
-                    "precipitation_probability": hourly.get("precipitation_probability", [])[idx],
-                    "precipitation_mm": hourly.get("precipitation", [])[idx],
+                    "precipitation_probability": prob_list[idx],
+                    "precipitation_mm": precip_list[idx],
                 })
             except (ValueError, IndexError):
                 continue

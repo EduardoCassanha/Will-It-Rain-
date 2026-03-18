@@ -5,7 +5,10 @@ from backend.http_client import http_client
 logger = logging.getLogger(__name__)
 
 async def get_weather_for_points(points: list, departure_time: str) -> list[dict]:
-    if not points:
+    MAX_POINTS = 50
+    if not points or len(points) > MAX_POINTS:
+        if points and len(points) > MAX_POINTS:
+            logger.warning(f"WEATHER: Rejected. {len(points)} points exceeds MAX_POINTS {MAX_POINTS}")
         return []
 
     try:

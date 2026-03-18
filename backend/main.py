@@ -100,8 +100,10 @@ async def check_rain(request: Request, trip: TripRequest):
         get_coordinates(trip.destination)
     )
 
-    if not origin_coords or not destination_coords:
-        raise HTTPException(status_code=404, detail="Could not find one or both locations.")
+    if not origin_coords:
+        raise HTTPException(status_code=404, detail=f"Origin '{trip.origin}' not found.")
+    if not destination_coords:
+        raise HTTPException(status_code=404, detail=f"Destination '{trip.destination}' not found.")
 
     route_points = await get_route(origin_coords, destination_coords)
 

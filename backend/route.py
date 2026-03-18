@@ -40,11 +40,19 @@ async def get_route(origin: dict, destination: dict) -> list[dict]:
             logger.warning(f"ROUTE: No route found between {origin['name']} and {destination['name']}")
             return []
         feature = features[0]
-        coordinates = feature["geometry"]["coordinates"]
-        summary = feature["properties"]["summary"]
 
-        duration_seconds = summary["duration"]
-        distance_km = summary["distance"] / 1000
+        geometry = feature.get("geometry", {})
+        properties = feature.get("properties", {})
+
+        coordinates = geometry.get("coordinates", [])
+        summary = properties.get("summary", {})
+
+        if not coordinates or not summary:
+            logger.warning(f"ROUTE: Incomplete data (coords/summary) for route to {destination['name']}")
+            return []
+
+        duration_seconds = summary.get("duration", 0)
+        distance_km = summary.get("distance", 0) / 1000
 
         ideal_points = int(distance_km / 20)
         num_points = max(5, min(ideal_points, 25))

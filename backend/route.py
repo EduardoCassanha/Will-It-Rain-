@@ -35,7 +35,11 @@ async def get_route(origin: dict, destination: dict) -> list[dict]:
 
         data = response.json()
 
-        feature = data["features"][0]
+        features = data.get("features")
+        if not features:
+            logger.warning(f"ROUTE: No route found between {origin['name']} and {destination['name']}")
+            return []
+        feature = features[0]
         coordinates = feature["geometry"]["coordinates"]
         summary = feature["properties"]["summary"]
 

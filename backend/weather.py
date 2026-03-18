@@ -5,7 +5,10 @@ from backend.http_client import http_client
 logger = logging.getLogger(__name__)
 
 async def get_weather_for_points(points: list, departure_time: str) -> list[dict]:
-    if not points:
+    MAX_POINTS = 50
+    if not points or len(points) > MAX_POINTS:
+        if points and len(points) > MAX_POINTS:
+            logger.warning(f"WEATHER: Rejected. {len(points)} points exceeds MAX_POINTS {MAX_POINTS}")
         return []
 
     try:
@@ -39,24 +42,31 @@ async def get_weather_for_points(points: list, departure_time: str) -> list[dict
 
             arrival = base_time + timedelta(minutes=point["estimated_minutes"])
             hourly = data[i].get("hourly", {})
+
+            prob_list = hourly.get("precipitation_probability", [])
+            precip_list = hourly.get("precipitation", [])
             times = hourly.get("time", [])
+
+            if not all([times, prob_list, precip_list]):
+                logger.warning(f"WEATHER: Incomplete data for point {i} ({point['lat']}, {point['lon']})")
+                continue
 
             try:
 
                 api_times = [datetime.fromisoformat(t).replace(tzinfo=timezone.utc) for t in times]
-
                 idx = min(range(len(api_times)), key=lambda j: abs(api_times[j] - arrival))
+
                 results.append({
                     "lat": point["lat"],
                     "lon": point["lon"],
                     "time": times[idx],
-                    "precipitation_probability": hourly.get("precipitation_probability", [])[idx],
-                    "precipitation_mm": hourly.get("precipitation", [])[idx],
+                    "precipitation_probability": prob_list[idx],
+                    "precipitation_mm": precip_list[idx],
                 })
             except (ValueError, IndexError):
                 continue
 
         return results
-    except Exception as e:
-        logger.error(f"Weather Service Error: {type(e).__name__}: {e}")
+    except Exception:
+        logger.error(f"Weather Service Error")
         return []

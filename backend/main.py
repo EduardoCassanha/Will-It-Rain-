@@ -15,6 +15,8 @@ from slowapi.util import get_remote_address
 
 load_dotenv()
 
+ENV = os.getenv("ENV", "development").lower()
+
 from backend.geocoding import get_coordinates
 from backend.http_client import http_client
 from backend.route import get_route
@@ -33,7 +35,20 @@ async def lifespan(app: FastAPI):
     logging.info("Global HTTP client closed.")
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    docs_url=None if ENV == "production" else "/docs",
+    redoc_url=None if ENV == "production" else "/redoc",
+    openapi_url=None if ENV == "production" else "/openapi.json"
+)
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -54,10 +69,10 @@ else:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["*"],
+    allow_headers=["Content-Type", "Authorization"],
+    expose_headers=[],
 )
 
 class TripRequest(BaseModel):
@@ -93,8 +108,10 @@ async def check_rain(request: Request, trip: TripRequest):
         get_coordinates(trip.destination)
     )
 
-    if not origin_coords or not destination_coords:
-        raise HTTPException(status_code=404, detail="Could not find one or both locations.")
+    if not origin_coords:
+        raise HTTPException(status_code=404, detail=f"Origin '{trip.origin}' not found.")
+    if not destination_coords:
+        raise HTTPException(status_code=404, detail=f"Destination '{trip.destination}' not found.")
 
     route_points = await get_route(origin_coords, destination_coords)
 

@@ -49,6 +49,6 @@ async def get_coordinates(address: str) -> Optional[dict]:
             "lat": float(location["lat"]),
             "lon": float(location["lon"])
         }
-    except httpx.HTTPError as e:
-        logger.error(f"GEOCODING: Request failed | Query: {address} | Error: '{str(e)}'")
+    except httpx.HTTPError:
+        logger.error(f"GEOCODING: Request failed for adress: {address}")
         return None

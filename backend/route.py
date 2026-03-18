@@ -56,17 +56,22 @@ async def get_route(origin: dict, destination: dict) -> list[dict]:
 
         ideal_points = int(distance_km / 20)
         num_points = max(5, min(ideal_points, 25))
-        step = max(1, len(coordinates) // num_points)
+
+        total_coords = len(coordinates)
+        step = max(1, total_coords // num_points)
+
         sampled = coordinates[::step]
-        if coordinates[-1] not in sampled:
+
+        if total_coords > 0 and coordinates[-1] not in sampled:
             sampled.append(coordinates[-1])
 
         points = []
         num_sampled = len(sampled)
 
         for i, coord in enumerate(sampled):
-            progress = i / (num_sampled - 1) if num_sampled > 1 else 0
+            progress = i / (num_sampled - 1) if num_sampled > 1 else 1.0
             estimated_minutes = (duration_seconds * progress) / 60
+
             points.append({
                 "lat": coord[1],
                 "lon": coord[0],

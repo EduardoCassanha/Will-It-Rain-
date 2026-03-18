@@ -15,6 +15,8 @@ from slowapi.util import get_remote_address
 
 load_dotenv()
 
+ENV = os.getenv("ENV", "development").lower()
+
 from backend.geocoding import get_coordinates
 from backend.http_client import http_client
 from backend.route import get_route
@@ -33,7 +35,12 @@ async def lifespan(app: FastAPI):
     logging.info("Global HTTP client closed.")
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    docs_url=None if ENV == "production" else "/docs",
+    redoc_url=None if ENV == "production" else "/redoc",
+    openapi_url=None if ENV == "production" else "/openapi.json"
+)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)

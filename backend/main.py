@@ -71,11 +71,10 @@ if raw_origins:
     origins = raw_origins.split(",")
 else:
     origins = [
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "http://127.0.0.1:8000",
-        "http://localhost:8000",
-        "http://localhost:63342"
+        "https://will-it-rain.cassanha.com",
+        "https://api-will-it-rain.cassanha.com",
+        "http://localhost:3000",
+        "https://cassanha.com",
     ]
 
 app.add_middleware(

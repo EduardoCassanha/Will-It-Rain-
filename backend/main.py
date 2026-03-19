@@ -12,6 +12,7 @@ from pydantic import BaseModel, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 load_dotenv()
 
@@ -73,6 +74,14 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
     expose_headers=[],
+)
+
+raw_hosts = os.getenv("ALLOWED_HOSTS")
+allowed_hosts = raw_hosts.split(",") if raw_hosts else ["localhost", "127.0.0.1"]
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=allowed_hosts,
 )
 
 class TripRequest(BaseModel):

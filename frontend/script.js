@@ -76,7 +76,7 @@ function setLang(lang) {
 
 setLang(currentLang);
 
-const API_URL = 'https://api.will-it-rain.cassanha.com/check-rain';
+const API_URL = 'https://api-will-it-rain.cassanha.com/check-rain';
 
 document.getElementById('btn').addEventListener('click', handleSubmit);
 

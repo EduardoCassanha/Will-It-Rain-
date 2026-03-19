@@ -36,7 +36,13 @@ async def lifespan(app: FastAPI):
     await http_client.aclose()
     logging.info("Global HTTP client closed.")
 
-limiter = Limiter(key_func=get_remote_address)
+def get_real_ip(request: Request) -> str:
+    forwarded_ip = request.headers.get("cf-connecting-ip")
+    if forwarded_ip:
+        return forwarded_ip
+    return get_remote_address(request)
+
+limiter = Limiter(key_func=get_real_ip)
 app = FastAPI(
     lifespan=lifespan,
     docs_url=None if ENV == "production" else "/docs",
